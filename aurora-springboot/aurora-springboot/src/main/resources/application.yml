@@ -1,0 +1,75 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/aurora?serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf8
+    username: root
+    password: root
+    hikari:
+      minimum-idle: 10
+      idle-timeout: 180000
+      maximum-pool-size: 100
+      auto-commit: true
+      pool-name: MyHikariCP
+      max-lifetime: 60000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 0
+    lettuce:
+      pool:
+        min-idle: 10
+        max-idle: 100
+        max-active: 100
+        max-wait: 10000
+
+
+  mail:
+    host: smtp.163.com
+    username: 邮箱
+    password: 密码
+    default-encoding: UTF-8
+    protocol: smtp
+    port: 465
+    properties:
+      mail:
+        smtp:
+          auth: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+            port: 465
+          ssl:
+            enable: true
+          starttls:
+            enable: true
+            required: true
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+
+
+upload:
+  mode: oss
+  oss:
+    url: https://blogdemo1.oss-cn-hongkong.aliyuncs.com/
+    endpoint: oss-cn-hongkong.aliyuncs.com
+    accessKeyId: LTAI5tE1QETdBLQyF2Ecx6Kx
+    accessKeySecret: q2TxZqTqzCahocJJ0uK1ZeROQI7Kes
+    bucketName: blogdemo1
+
+

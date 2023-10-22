@@ -1,0 +1,26 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    hidden: true,
+    component: () => import('../views/login/Login.vue')
+  }
+]
+const createRouter = () =>
+  new VueRouter({
+    mode: 'hash',
+    routes: routes
+  })
+const router = createRouter()
+
+export function resetRouter() {
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher
+}
+
+export default router

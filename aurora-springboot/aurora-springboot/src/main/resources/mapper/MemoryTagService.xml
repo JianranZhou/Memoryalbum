@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aurora.mapper.MemoryMapper">
+    <resultMap id="ArticleCardDTOResultMap" type="com.aurora.model.dto.MemoryCardDTO">
+        <id property="id" column="id"/>
+        <result property="memoryCover" column="memory_cover"/>
+        <result property="memoryTitle" column="memory_title"/>
+        <result property="memoryContent" column="memory_content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="author" javaType="com.aurora.entity.UserInfo">
+            <result property="nickname" column="author_nickname"/>
+            <result property="website" column="author_website"/>
+            <result property="avatar" column="author_avatar"/>
+        </association>
+        <collection property="tags" ofType="com.aurora.entity.Tag">
+            <result property="tagName" column="tag_name"/>
+        </collection>
+    </resultMap>
+    <resultMap id="ArticleDTOResultMap" type="com.aurora.model.dto.MemoryDTO">
+        <id property="id" column="id"/>
+        <result property="memoryCover" column="memory_cover"/>
+        <result property="memoryTitle" column="memory_title"/>
+        <result property="memoryContent" column="memory_content"/>
+        <result property="audioUrl" column="audio_url"/>
+        <result property="videoUrl" column="video_url"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="author" javaType="com.aurora.entity.UserInfo">
+            <result property="nickname" column="author_nickname"/>
+            <result property="website" column="author_website"/>
+            <result property="avatar" column="author_avatar"/>
+        </association>
+        <collection property="tags" ofType="com.aurora.entity.Tag">
+            <result property="tagName" column="tag_name"/>
+            <result property="tagId" column="tag_id"/>
+        </collection>
+    </resultMap>
+    <resultMap id="articleAdminResultMap" type="com.aurora.model.dto.MemoryAdminDTO">
+        <id property="id" column="id"/>
+        <result property="memoryCover" column="memory_cover"/>
+        <result property="memoryTitle" column="memory_title"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="createTime" column="create_time"/>
+        <result property="audioUrl" column="audio_url"/>
+        <result property="userName" column="userName"/>
+        <result property="videoUrl" column="video_url"/>
+        <collection property="tagDTOs" ofType="com.aurora.model.dto.TagDTO">
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="tagName"/>
+        </collection>
+    </resultMap>
+    <select id="listTopAndFeaturedArticles" resultMap="ArticleCardDTOResultMap">
+        SELECT a.id                            AS id,
+               memory_cover,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+
+               a.create_time                   AS create_time,
+               a.update_time                   AS update_time,
+               u.nickname                      AS author_nickname,
+               u.website                       AS author_website,
+               u.avatar                        AS author_avatar,
+               tag_name
+        FROM (SELECT id,
+                     user_id,
+                     memory_cover,
+                     memory_title,
+                     memory_abstract,
+                     memory_content,
+                     is_delete,
+                     create_time,
+                     update_time
+              FROM t_memory where user_id =  #{userId}) a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+        where a.is_delete = 0
+    </select>
+    <select id="listArticles" resultMap="ArticleCardDTOResultMap">
+        SELECT a.id                            AS id,
+               memory_cover,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+
+               a.create_time                   AS create_time,
+               a.update_time                   AS update_time,
+               u.nickname                      AS author_nickname,
+               u.website                       AS author_website,
+               u.avatar                        AS author_avatar,
+               tag_name
+        FROM (SELECT id,
+                     user_id,
+                     memory_cover,
+                     memory_abstract,
+                     memory_title,
+                     memory_content,
+                     is_delete,
+                     create_time,
+                     update_time
+              FROM t_memory
+              where is_delete = 0
+            <if test="keywords != null">
+                and memory_title like concat('%',#{keywords},'%')
+            </if>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+              order by id desc
+              LIMIT #{current} , #{size}) a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+    </select>
+
+    <select id="getArticleById" resultMap="ArticleDTOResultMap">
+        SELECT a.id            AS id,
+               memory_cover,
+               memory_title,
+               memory_content,
+               audio_url,
+               video_url,
+               a.create_time   AS create_time,
+               a.update_time   AS update_time,
+               u.nickname      AS author_nickname,
+               u.website       AS author_website,
+               u.avatar        AS author_avatar,
+               tag_name,
+               t.id as tag_id
+        FROM (SELECT id,
+                     user_id,
+                     memory_cover,
+                     memory_title,
+                     memory_abstract,
+                     memory_content,
+                     audio_url,
+                     video_url,
+                     is_delete,
+                     create_time,
+                     update_time
+              FROM t_memory
+              WHERE id = #{memoryId}
+                and is_delete = 0) a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+    </select>
+    <select id="getPreArticleById" resultMap="ArticleCardDTOResultMap">
+        SELECT a.id                            AS id,
+               memory_cover,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+
+               a.create_time                   AS create_time,
+               a.update_time                   AS update_time,
+               u.nickname                      AS author_nickname,
+               u.website                       AS author_website,
+               u.avatar                        AS author_avatar,
+
+               tag_name
+        FROM (SELECT id,
+                     user_id,
+
+                     memory_cover,
+                     memory_title,
+                     memory_abstract,
+                     memory_content,
+                     is_delete,
+                     create_time,
+                     update_time
+              FROM t_memory
+              WHERE id &lt; #{memoryId}
+                and user_id = #{userId}
+                and is_delete = 0
+              order by id desc
+              limit 0, 1) a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+    </select>
+    <select id="getNextArticleById" resultMap="ArticleCardDTOResultMap">
+        SELECT a.id                            AS id,
+               memory_cover,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+
+
+               a.create_time                   AS create_time,
+               a.update_time                   AS update_time,
+               u.nickname                      AS author_nickname,
+               u.website                       AS author_website,
+               u.avatar                        AS author_avatar,
+
+               tag_name
+        FROM (SELECT id,
+                     user_id,
+
+                     memory_cover,
+                     memory_title,
+                     memory_abstract,
+                     memory_content,
+
+                     is_delete,
+
+                     create_time,
+                     update_time
+              FROM t_memory
+              WHERE id &gt; #{memoryId}
+                and is_delete = 0
+                and user_id = #{userId}
+              order by id
+              limit 0,1) a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+    </select>
+    <select id="getFirstArticle" resultMap="ArticleCardDTOResultMap">
+        SELECT a.id                            AS id,
+               memory_cover,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+
+               a.create_time                   AS create_time,
+               a.update_time                   AS update_time,
+               u.nickname                      AS author_nickname,
+               u.website                       AS author_website,
+               u.avatar                        AS author_avatar,
+
+               tag_name
+        FROM (SELECT id,
+                     user_id,
+
+                     memory_cover,
+                     memory_title,
+                     memory_abstract,
+                     memory_content,
+                     is_delete,
+                     create_time,
+                     update_time
+              FROM t_memory
+              WHERE is_delete = 0
+
+              order by id
+              limit 0,1) a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+    </select>
+    <select id="getLastArticle" resultMap="ArticleCardDTOResultMap">
+        SELECT a.id                            AS id,
+               memory_cover,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+
+               a.create_time                   AS create_time,
+               a.update_time                   AS update_time,
+               u.nickname                      AS author_nickname,
+               u.website                       AS author_website,
+               u.avatar                        AS author_avatar,
+
+               tag_name
+        FROM (SELECT id,
+                     user_id,
+
+                     memory_cover,
+                     memory_title,
+                     memory_abstract,
+                     memory_content,
+                     is_delete,
+                     create_time,
+                     update_time
+              FROM t_memory
+              WHERE is_delete = 0
+
+              order by id desc
+              limit 0,1) a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+    </select>
+    <select id="listArticlesByTagId" resultMap="ArticleCardDTOResultMap">
+        SELECT a.id                            AS id,
+
+               memory_cover,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+
+               a.create_time                   AS create_time,
+               a.update_time                   AS update_time,
+               u.nickname                      AS author_nickname,
+               u.website                       AS author_website,
+               u.avatar                        AS author_avatar,
+
+               tag_name
+        FROM t_memory a
+                 LEFT JOIN t_memory_tag at
+                           ON a.id = at.memory_id
+                 LEFT JOIN t_tag t ON t.id = at.tag_id
+
+                 LEFT JOIN t_user_info u ON a.user_id = u.id
+        WHERE at.tag_id = #{tagId}
+          and a.is_delete = 0
+          and a.user_id = #{userId}
+
+        LIMIT #{current} , #{size}
+    </select>
+    <select id="listArchives" resultType="com.aurora.model.dto.MemoryCardDTO">
+        SELECT id,
+               memory_title,
+               if(memory_abstract is null or memory_abstract = '', SUBSTR(memory_content, 1, 500), memory_abstract) AS memory_content,
+               create_time
+        FROM t_memory
+        WHERE is_delete = 0
+        and user_id = #{userId}
+        ORDER BY create_time DESC
+        LIMIT #{current}, #{size}
+    </select>
+    <select id="countArticleAdmins" resultType="java.lang.Integer">
+        SELECT
+        count(DISTINCT a.id)
+        from
+        t_memory a
+        LEFT JOIN t_memory_tag at on a.id = at.memory_id
+        <where>
+            is_delete = #{conditionVO.isDelete}
+            <if test="conditionVO.keywords != null">
+                and memory_title like concat('%',#{conditionVO.keywords},'%')
+            </if>
+
+            <if test="conditionVO.tagId != null">
+                and at.tag_id = #{conditionVO.tagId}
+            </if>
+        </where>
+    </select>
+    <select id="listArticlesAdmin" resultMap="articleAdminResultMap">
+        SELECT
+        a.id,
+        memory_cover,
+        memory_title,
+        audio_url,
+        video_url,
+        a.is_delete,
+
+        a.create_time,
+        t.id AS tag_id,
+        t.tag_name,
+        u.nickname as userName
+        FROM
+        (
+        SELECT
+        id,
+        memory_cover,
+        memory_title,
+        audio_url,
+        video_url,
+        is_delete,
+
+        create_time,
+        user_id
+        FROM
+        t_memory
+        <where>
+            is_delete = #{conditionVO.isDelete}
+            <if test="conditionVO.keywords != null">
+                and memory_title like concat('%',#{conditionVO.keywords},'%')
+            </if>
+
+            <if test="conditionVO.tagId != null">
+                and id in
+                (
+                SELECT
+                memory_id
+                FROM
+                t_memory_tag
+                WHERE
+                tag_id = #{conditionVO.tagId}
+                )
+            </if>
+        </where>
+        ORDER BY
+        id DESC
+        LIMIT #{current},#{size}
+        ) a
+        LEFT JOIN t_memory_tag at ON a.id = at.memory_id
+        LEFT JOIN t_tag t ON t.id = at.tag_id
+        left join t_user_info u on u.id = a.user_id
+        ORDER BY
+        a.id DESC
+    </select>
+    <select id="listArticleStatistics" resultType="com.aurora.model.dto.MemoryStatisticsDTO">
+        SELECT DATE_FORMAT(create_time, "%Y-%m-%d") AS date,
+               COUNT(1)                             AS count
+        FROM t_memory
+        GROUP BY date
+        ORDER BY date DESC
+    </select>
+</mapper>
