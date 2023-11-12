@@ -31,6 +31,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="memoryCount" label="Memory Count" align="center" width="140" />
+      <el-table-column prop="sex" label="Sex" align="center" width="140" />
       <el-table-column prop="createTime" label="create time" width="130" align="center">
         <template slot-scope="scope">
           <i class="el-icon-time" style="margin-right: 5px" />

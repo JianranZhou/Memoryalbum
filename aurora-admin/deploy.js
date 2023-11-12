@@ -2,7 +2,7 @@ require('dotenv').config({ path: __dirname + '/.env.local' })
 const client = require('scp2')
 const ora = require('ora')
 const chalk = require('chalk')
-const spinner = ora(chalk.green('正在部署项目到服务器...'))
+const spinner = ora(chalk.green('Deploying the project to server...'))
 const Client = require('ssh2').Client
 const conn = new Client()
 conn
@@ -24,7 +24,7 @@ conn
             (err) => {
               if (!err) {
                 spinner.stop()
-                console.log(chalk.green('项目部署完成！'))
+                console.log(chalk.green('Project deployed！'))
               } else {
                 console.log(chalk.red(err))
               }
@@ -37,7 +37,7 @@ conn
     })
   })
   .on('error', async (err) => {
-    console.log(chalk.red('Client 连接错误' + err.toString()))
+    console.log(chalk.red('Client connection error' + err.toString()))
   })
   .connect({
     host: process.env.VUE_APP_HOST,

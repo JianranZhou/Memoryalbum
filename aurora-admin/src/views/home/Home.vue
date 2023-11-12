@@ -54,7 +54,7 @@ export default {
         },
         color: ['#3888fa'],
         legend: {
-          data: ['访问量']
+          data: ['Visitors']
         },
         grid: {
           left: '0%',
@@ -80,7 +80,7 @@ export default {
         },
         series: [
           {
-            name: '访问量',
+            name: 'Visitors',
             type: 'line',
             data: [],
             smooth: true
@@ -108,7 +108,7 @@ export default {
         yAxis: {},
         series: [
           {
-            name: ['浏览量'],
+            name: ['Views'],
             type: 'bar',
             data: []
           }

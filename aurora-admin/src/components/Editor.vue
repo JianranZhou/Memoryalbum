@@ -53,7 +53,6 @@ export default {
       this.isLocked = true
     },
     onBlur() {
-      // 记录光标
       if (window.getSelection) {
         var selection = window.getSelection()
         this.range = selection.getRangeAt(0)
@@ -62,18 +61,14 @@ export default {
       this.isLocked = false
     },
     addText(value) {
-      // 还原光标
       if (window.getSelection) {
         var selection = window.getSelection()
         selection.removeAllRanges()
-        // 为空初始化光标
         if (this.range == null) {
           this.$refs.editor.focus()
           this.range = selection.getRangeAt(0)
         }
-        // 删除选中内容
         this.range.deleteContents()
-        // 添加内容
         this.range.insertNode(this.range.createContextualFragment(value))
         this.range.collapse(false)
         selection.addRange(this.range)

@@ -52,12 +52,12 @@ export default {
         .then(({ data }) => {
           if (data.flag) {
             this.$notify.success({
-              title: '成功',
+              title: 'Success',
               message: data.message
             })
           } else {
             this.$notify.error({
-              title: '失败',
+              title: 'Fail',
               message: data.message
             })
           }

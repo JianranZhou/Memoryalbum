@@ -30,35 +30,10 @@
     </div>
     <el-table border :data="articles" @selection-change="selectionChange" v-loading="loading">
       <el-table-column type="selection" width="55" />
+      <el-table-column prop="memoryTitle" label="title" align="center" width="200"/>
+      <el-table-column prop="userName" label="user" align="center" width="200"/>
 
-      <el-table-column prop="memoryTitle" label="title" align="center" width="100"/>
-      <el-table-column prop="userName" label="user" align="center" width="100"/>
-
-      <el-table-column prop="image" label="image" width="180" align="center">
-        <template slot-scope="scope">
-          <el-image
-              class="article-cover"
-              :src="scope.row.memoryCover" />
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="articleVideo" label="video" width="180" align="center">
-        <template slot-scope="scope">
-          <video style="width: 100%;height: 100%;" controls>
-            <source :src="scope.row.videoUrl" type="video/mp4">
-          </video>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="audio" label="audio" align="center">
-        <template slot-scope="scope">
-          <audio controls>
-            <source :src="scope.row.audioUrl" type="audio/ogg">
-          </audio>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="tagDTOs" label="tag" width="170" align="center">
+      <el-table-column prop="tagDTOs" label="tag"align="center">
         <template slot-scope="scope">
           <el-tag v-for="item of scope.row.tagDTOs" :key="item.tagId" style="margin-right: 0.2rem; margin-top: 0.2rem">
             {{ item.tagName }}
